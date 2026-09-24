@@ -1,0 +1,26 @@
+name: Extraire le zip
+on:
+  workflow_dispatch:
+  push:
+    paths: ['neon-salvage.zip']
+permissions:
+  contents: write
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extraire
+        run: |
+          mkdir /tmp/new
+          unzip -q neon-salvage.zip -d /tmp/new
+          rm -rf /tmp/new/.github
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name .github -exec rm -rf {} +
+          cp -a /tmp/new/. .
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Projet complet avec arborescence"
+          git push
