@@ -1,0 +1,1 @@
+Capture d'écran à ajouter manuellement (ex: docs/screenshot.png), puis mets à jour le lien dans README.md.
