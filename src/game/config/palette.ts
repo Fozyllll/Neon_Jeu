@@ -15,6 +15,7 @@ export interface Palette {
   scout: number;
   sentinel: number;
   hunter: number;
+  brute: number;
   enemyBolt: number;
   playerBolt: number;
   base: number;
@@ -44,6 +45,7 @@ export const PALETTE_DEFAULT: Palette = {
   scout: 0xff3df2,
   sentinel: 0xff9a3c,
   hunter: 0xff4d5e,
+  brute: 0xb36bff,
   enemyBolt: 0xff9a3c,
   playerBolt: 0x9ff6ff,
   base: 0x4dff9a,
@@ -68,6 +70,7 @@ export const PALETTE_COLORBLIND: Palette = {
   scout: 0xcc79a7,
   sentinel: 0xe69f00,
   hunter: 0xd55e00,
+  brute: 0x009e73,
   enemyBolt: 0xd55e00,
   playerBolt: 0xbfe6ff,
   base: 0xf0e442,

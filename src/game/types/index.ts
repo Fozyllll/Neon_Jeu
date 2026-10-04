@@ -1,5 +1,5 @@
 export type ResourceKind = 'scrap' | 'cell' | 'crystal' | 'component' | 'core';
-export type EnemyKind = 'scout' | 'sentinel' | 'hunter';
+export type EnemyKind = 'scout' | 'sentinel' | 'hunter' | 'brute';
 export type UpgradeId =
   | 'battery'
   | 'hull'

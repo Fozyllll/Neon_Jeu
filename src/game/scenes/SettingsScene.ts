@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { VIEW_W } from '../config/balance';
+import { VIEW_H, VIEW_W } from '../config/balance';
 import { KEY_ACTIONS, KEY_ACTION_LABELS, keyLabel } from '../config/keys';
 import { TEXT_SCALE_MAX, TEXT_SCALE_MIN } from '../save/saveData';
 import { audio, save } from '../services';
@@ -37,7 +37,7 @@ export class SettingsScene extends Phaser.Scene {
       this,
       VIEW_W / 2,
       46,
-      'Flèches/W-S : naviguer · Flèches/A-D : ajuster · Entrée : valider',
+      'Flèches/W-S : naviguer · Flèches/A-D : ajuster · Molette/glisser : défiler',
       11,
       'dim',
       {
@@ -124,11 +124,12 @@ export class SettingsScene extends Phaser.Scene {
       })),
       {
         x: VIEW_W / 2,
-        y: 84,
-        spacing: 26,
+        y: 66,
+        spacing: 25,
         size: 14,
         wrap: VIEW_W - 80,
         onBack: () => this.scene.start(this.from),
+        viewport: { top: 64, height: VIEW_H - 64 - 14 },
       },
     );
 
@@ -182,7 +183,7 @@ export class SettingsScene extends Phaser.Scene {
     this.input.keyboard?.off('keydown', this.rebindHandler);
     this.rebinding = null;
     this.menu.setLocked(false);
-    this.hint.setText('Flèches/W-S : naviguer · Flèches/A-D : ajuster · Entrée : valider');
+    this.hint.setText('Flèches/W-S : naviguer · Flèches/A-D : ajuster · Molette/glisser : défiler');
     if (e.keyCode === Phaser.Input.Keyboard.KeyCodes.ESC) return;
     this.set((d) => {
       for (const other of KEY_ACTIONS)

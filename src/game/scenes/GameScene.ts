@@ -18,6 +18,7 @@ import type { DefeatCause, GameMap, RunResult } from '../types';
 import { announce, audio, save } from '../services';
 import { Hud } from '../ui/Hud';
 import { Minimap } from '../ui/Minimap';
+import { TouchControls } from '../ui/TouchControls';
 import { hasLineOfSight } from '../world/collision';
 import { FlowField } from '../world/flowField';
 import { pxToTile, rectContainsPx, tileCenter } from '../world/grid';
@@ -36,6 +37,7 @@ export class GameScene extends Phaser.Scene {
   private effects!: Effects;
   private hud!: Hud;
   private minimap!: Minimap;
+  private touch!: TouchControls;
   private flow!: FlowField;
   private enemies: Enemy[] = [];
   private resources: ResourceNode[] = [];
@@ -90,7 +92,10 @@ export class GameScene extends Phaser.Scene {
     );
     this.cameras.main.startFollow(this.player.sprite, true, 0.12, 0.12);
 
-    this.gameInput = new InputState(this, save.data.settings.keys);
+    this.touch = new TouchControls(this);
+    this.gameInput = new InputState(this, save.data.settings.keys, (x, y) =>
+      this.touch.isReserved(x, y),
+    );
     this.bolts = new BoltSystem(this);
     this.effects = new Effects(this, effectsProfile(save.data.settings));
 
@@ -200,11 +205,22 @@ export class GameScene extends Phaser.Scene {
     if (this.gameInput.isDown('down')) dy += 1;
     if (this.gameInput.isDown('left')) dx -= 1;
     if (this.gameInput.isDown('right')) dx += 1;
+    if (this.touch.active) {
+      dx += this.touch.vector.x;
+      dy += this.touch.vector.y;
+    }
+    this.gameInput.touchAction = this.touch.active && this.touch.actionHeld;
     const len = Math.hypot(dx, dy);
     const sprinting = this.isSprinting();
     const speed = baseSpeedFor(this.run.stats, sprinting);
     if (len > 0) {
-      this.player.move(this.map, (dx / len) * speed * dt, (dy / len) * speed * dt);
+      // Le joystick tactile permet une vitesse partielle ; le clavier, toujours à pleine vitesse.
+      const scale = Math.min(1, len);
+      this.player.move(
+        this.map,
+        (dx / len) * scale * speed * dt,
+        (dy / len) * scale * speed * dt,
+      );
     }
     void inBase;
 
@@ -378,6 +394,7 @@ export class GameScene extends Phaser.Scene {
             other.forceAlert();
           }
         },
+        onChargeStart: () => audio.play('chargeWarn'),
       });
     }
   }

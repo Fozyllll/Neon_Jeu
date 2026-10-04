@@ -9,6 +9,11 @@ export class InputState {
   pointerX = 0;
   pointerY = 0;
   pointerDown = false;
+  /** Axe de déplacement virtuel (manette tactile), combiné au clavier. -1..1 sur chaque axe. */
+  touchAxis = { x: 0, y: 0 };
+  /** Bouton d'action tactile (équivalent de la touche "interact"). */
+  touchAction = false;
+  private firePointerId: number | null = null;
   private keys: Record<KeyAction, number>;
   private readonly keyDownHandler: (e: KeyboardEvent) => void;
   private readonly keyUpHandler: (e: KeyboardEvent) => void;
@@ -16,6 +21,8 @@ export class InputState {
   constructor(
     private readonly scene: Phaser.Scene,
     keys: Record<KeyAction, number>,
+    /** Renvoie vrai si ce point de l'écran est réservé par un contrôle tactile (manette, bouton). */
+    private readonly isReserved?: (x: number, y: number) => boolean,
   ) {
     this.keys = keys;
     this.keyDownHandler = (e) => {
@@ -26,15 +33,24 @@ export class InputState {
     scene.input.keyboard?.on('keydown', this.keyDownHandler);
     scene.input.keyboard?.on('keyup', this.keyUpHandler);
     scene.input.on('pointermove', (p: Phaser.Input.Pointer) => {
+      if (this.firePointerId !== null && p.id !== this.firePointerId) return;
+      if (this.firePointerId === null && this.isReserved?.(p.x, p.y)) return;
       this.pointerX = p.worldX;
       this.pointerY = p.worldY;
     });
     scene.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
+      if (this.isReserved?.(p.x, p.y)) return;
       this.pointerDown = true;
+      this.firePointerId = p.id;
       this.pointerX = p.worldX;
       this.pointerY = p.worldY;
     });
-    scene.input.on('pointerup', () => (this.pointerDown = false));
+    scene.input.on('pointerup', (p: Phaser.Input.Pointer) => {
+      if (p.id === this.firePointerId) {
+        this.pointerDown = false;
+        this.firePointerId = null;
+      }
+    });
   }
 
   setKeys(keys: Record<KeyAction, number>): void {
@@ -42,6 +58,7 @@ export class InputState {
   }
 
   isDown(action: KeyAction): boolean {
+    if (action === 'interact' && this.touchAction) return true;
     return this.down.has(this.keys[action]);
   }
 

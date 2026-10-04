@@ -34,7 +34,8 @@ export class SectorSelectScene extends Phaser.Scene {
       fixedSize: true,
     });
 
-    drawPanel(this, 20, 46, VIEW_W - 40, 220, 0x38e8ff, 0.45);
+    drawPanel(this, 20, 46, 300, 240, 0x38e8ff, 0.45);
+    drawPanel(this, 334, 46, VIEW_W - 334 - 20, 240, 0xff9a3c, 0.4);
     for (const t of this.infoTexts) t.destroy();
     this.infoTexts = [];
 
@@ -48,7 +49,7 @@ export class SectorSelectScene extends Phaser.Scene {
       label: () => {
         const locked = sector.id > unlocked;
         const best = save.data.bestScores[String(sector.id)];
-        return `${sector.name}${locked ? '  (verrouillé)' : best ? `  — meilleur score ${best}` : ''}`;
+        return `${sector.name}${locked ? '  (verrouillé)' : best ? `  — record ${best}` : ''}`;
       },
       onSelect: () => {
         if (sector.id > unlocked) return;
@@ -58,10 +59,12 @@ export class SectorSelectScene extends Phaser.Scene {
     }));
 
     new Menu(this, items, {
-      x: VIEW_W / 2,
+      x: 34,
       y: 66,
-      spacing: 27,
-      size: 15,
+      spacing: 42,
+      size: 14,
+      align: 'left',
+      wrap: 270,
       onFocus: (i) => {
         this.index = i;
         this.refreshInfo();
@@ -94,6 +97,7 @@ export class SectorSelectScene extends Phaser.Scene {
         x: VIEW_W / 2,
         y: VIEW_H - 22,
         size: 13,
+        keyboardNav: false,
       },
     );
 
@@ -106,26 +110,28 @@ export class SectorSelectScene extends Phaser.Scene {
     for (const t of this.infoTexts) t.destroy();
     this.infoTexts = [];
     const sector = SECTORS[this.index] as (typeof SECTORS)[number];
+    const colX = 350;
+    const colW = VIEW_W - 350 - 40;
     const lines = [
       sector.tagline,
       sector.description,
-      `Quota : ${sector.quota} crédits   ·   Objectif secondaire : ${
-        sector.secondary.type === 'kills'
-          ? `${sector.secondary.target} éliminations`
-          : `${sector.secondary.target} ressources rares`
-      }`,
-      `Carte ${sector.mapW}×${sector.mapH}   ·   Jusqu'à ${sector.maxEnemies} ennemis   ·   Multiplicateur de valeur ×${sector.valueMult}`,
+      `Quota : ${sector.quota} crédits`,
+      sector.secondary.type === 'kills'
+        ? `Objectif secondaire : ${sector.secondary.target} éliminations`
+        : `Objectif secondaire : ${sector.secondary.target} ressources rares`,
+      `Carte ${sector.mapW}×${sector.mapH}   ·   Jusqu'à ${sector.maxEnemies} ennemis`,
+      `Multiplicateur de valeur : ×${sector.valueMult}`,
     ];
-    let y = 62;
+    let y = 64;
     for (const line of lines) {
-      const t = makeText(this, VIEW_W / 2, y, line, 12, 'text', {
-        origin: [0.5, 0.5],
-        wrap: VIEW_W - 90,
-        align: 'center',
+      const t = makeText(this, colX, y, line, 12, 'text', {
+        origin: [0, 0],
+        wrap: colW,
+        align: 'left',
         fixedSize: true,
       });
       this.infoTexts.push(t);
-      y += 30;
+      y += t.height + 10;
     }
     this.seedText.setText(`Seed : ${this.seed}`);
   }

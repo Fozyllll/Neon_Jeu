@@ -171,6 +171,26 @@ export function createTextures(scene: Phaser.Scene, p: Palette): void {
     g.fillTriangle(34, 18, 28, 14, 28, 22);
   });
 
+  generate(scene, 'enemy-brute', 46, 46, (g) => {
+    polygon(
+      g,
+      [16, 2, 30, 2, 44, 16, 44, 30, 30, 44, 16, 44, 2, 30, 2, 16],
+      0x1c0a2e,
+      1,
+      p.brute,
+      4,
+    );
+    g.lineStyle(2, p.brute, 0.5);
+    g.strokeCircle(23, 23, 14);
+    g.fillStyle(p.brute, 1);
+    g.fillCircle(23, 23, 6);
+    g.fillStyle(0xffffff, 1);
+    g.fillCircle(23, 23, 2.5);
+    g.fillStyle(p.brute, 0.8);
+    g.fillRect(4, 20, 6, 6);
+    g.fillRect(36, 20, 6, 6);
+  });
+
   generate(scene, 'res-scrap', 20, 20, (g) => {
     g.fillStyle(p.scrap, 0.35);
     g.fillRect(4, 4, 12, 12);

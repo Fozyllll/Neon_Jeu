@@ -363,6 +363,9 @@ export function generateMap(seed: string, sector: SectorConfig): GameMap {
     if (rng.chance(sector.hunterChance * (0.5 + ratio))) {
       for (const tile of free) if (addEnemy('hunter', tile.tx, tile.ty, groupId++)) break;
     }
+    if (sector.bruteChance > 0 && rng.chance(sector.bruteChance * (0.4 + ratio))) {
+      for (const tile of free) if (addEnemy('brute', tile.tx, tile.ty, groupId++)) break;
+    }
   }
 
   return {

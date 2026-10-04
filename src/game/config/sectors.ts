@@ -18,6 +18,7 @@ export interface SectorConfig {
   scoutChance: number;
   sentinelChance: number;
   hunterChance: number;
+  bruteChance: number;
   maxEnemies: number;
   /** Rayon de sécurité (en tuiles de chemin) autour de la base : aucun ennemi n'y apparaît. */
   safeRadius: number;
@@ -45,6 +46,7 @@ export const SECTORS: readonly SectorConfig[] = [
     scoutChance: 0.5,
     sentinelChance: 0.25,
     hunterChance: 0.15,
+    bruteChance: 0,
     maxEnemies: 8,
     safeRadius: 16,
     valueMult: 1,
@@ -69,6 +71,7 @@ export const SECTORS: readonly SectorConfig[] = [
     scoutChance: 0.6,
     sentinelChance: 0.35,
     hunterChance: 0.3,
+    bruteChance: 0.12,
     maxEnemies: 14,
     safeRadius: 16,
     valueMult: 1.15,
@@ -93,6 +96,7 @@ export const SECTORS: readonly SectorConfig[] = [
     scoutChance: 0.6,
     sentinelChance: 0.45,
     hunterChance: 0.35,
+    bruteChance: 0.18,
     maxEnemies: 18,
     safeRadius: 18,
     valueMult: 1.3,
@@ -124,6 +128,7 @@ export const SECTORS: readonly SectorConfig[] = [
     scoutChance: 0.65,
     sentinelChance: 0.45,
     hunterChance: 0.4,
+    bruteChance: 0.24,
     maxEnemies: 22,
     safeRadius: 18,
     valueMult: 1.5,
@@ -155,6 +160,7 @@ export const SECTORS: readonly SectorConfig[] = [
     scoutChance: 0.7,
     sentinelChance: 0.5,
     hunterChance: 0.45,
+    bruteChance: 0.3,
     maxEnemies: 28,
     safeRadius: 20,
     valueMult: 1.8,

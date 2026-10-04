@@ -19,6 +19,14 @@ export interface EnemyDef {
   /** Poursuite limitée (chasseur) en secondes. */
   chaseSec?: number;
   giveUpCooldownSec?: number;
+  /** Charge (blindé) : fonce en ligne droite après un temps de visée. */
+  chargeTelegraphSec?: number;
+  chargeDurationSec?: number;
+  chargeSpeedMult?: number;
+  chargeCooldownSec?: number;
+  chargeMinRange?: number;
+  chargeMaxRange?: number;
+  chargeDamageMult?: number;
 }
 
 export const ENEMIES: Record<EnemyKind, EnemyDef> = {
@@ -61,6 +69,26 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
     scorePoints: 80,
     chaseSec: 7,
     giveUpCooldownSec: 6,
+  },
+  brute: {
+    kind: 'brute',
+    label: 'Blindé',
+    description: 'Lent et très résistant. Charge en ligne droite : esquive plutôt que fuis.',
+    hp: 130,
+    speed: 55,
+    radius: 18,
+    contactDamage: 14,
+    detectRange: 260,
+    scorePoints: 110,
+    chaseSec: 999,
+    giveUpCooldownSec: 4,
+    chargeTelegraphSec: 0.55,
+    chargeDurationSec: 0.4,
+    chargeSpeedMult: 3.2,
+    chargeCooldownSec: 2.4,
+    chargeMinRange: 90,
+    chargeMaxRange: 280,
+    chargeDamageMult: 1.8,
   },
 };
 

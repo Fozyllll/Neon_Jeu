@@ -10,7 +10,8 @@ export type SfxName =
   | 'shoot'
   | 'enemyDie'
   | 'click'
-  | 'error';
+  | 'error'
+  | 'chargeWarn';
 
 type ContextCtor = typeof AudioContext;
 
@@ -125,6 +126,11 @@ export class AudioManager {
           break;
         case 'error':
           this.tone(180, 0.15, 'square', 0.16);
+          break;
+        case 'chargeWarn':
+          // Grondement grave qui monte : un blindé prépare sa charge.
+          this.tone(90, 0.5, 'sawtooth', 0.22, 260);
+          this.tone(70, 0.5, 'square', 0.1, 220, 0.05);
           break;
       }
     } catch {

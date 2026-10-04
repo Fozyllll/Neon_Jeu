@@ -25,9 +25,11 @@ export interface EnemyContext {
   damagePlayer(amount: number, fromX: number, fromY: number): void;
   fireBolt(x: number, y: number, angle: number, speed: number, damage: number): void;
   alertGroup(groupId: number, source: Enemy): void;
+  /** Appelé une fois au début d'une charge (blindé), pour un signal sonore dédié. */
+  onChargeStart?(): void;
 }
 
-export type EnemyState = 'idle' | 'alert' | 'chase' | 'telegraph' | 'cooldown';
+export type EnemyState = 'idle' | 'alert' | 'chase' | 'telegraph' | 'cooldown' | 'charging';
 
 export interface EnemyInit {
   kind: EnemyKind;
@@ -68,6 +70,8 @@ export class Enemy {
   private wanderX: number;
   private wanderY: number;
   private wanderTimer = 0;
+  private chargeCd = 0;
+  private chargeAngle = 0;
 
   constructor(scene: Phaser.Scene, init: EnemyInit, palette: Palette, glow: boolean) {
     this.def = ENEMIES[init.kind];
@@ -113,7 +117,8 @@ export class Enemy {
   /** Progression 0..1 de l'avertissement avant un tir (sentinelle). */
   get telegraphProgress(): number {
     if (this.state !== 'telegraph') return 0;
-    return clamp(this.stateTime / (this.def.telegraphSec ?? 1), 0, 1);
+    const total = this.def.telegraphSec ?? this.def.chargeTelegraphSec ?? 1;
+    return clamp(this.stateTime / total, 0, 1);
   }
 
   forceAlert(): void {
@@ -158,6 +163,7 @@ export class Enemy {
     this.giveUpCd = Math.max(0, this.giveUpCd - dt);
     this.fireCd = Math.max(0, this.fireCd - dt);
     this.hitFlash = Math.max(0, this.hitFlash - dt);
+    this.chargeCd = Math.max(0, this.chargeCd - dt);
 
     const dx = ctx.player.x - this.x;
     const dy = ctx.player.y - this.y;
@@ -189,11 +195,16 @@ export class Enemy {
       dist < this.def.radius + ctx.player.radius + 2 &&
       this.contactCd <= 0
     ) {
-      ctx.damagePlayer(this.def.contactDamage, this.x, this.y);
+      const mult = this.state === 'charging' ? (this.def.chargeDamageMult ?? 1) : 1;
+      ctx.damagePlayer(this.def.contactDamage * mult, this.x, this.y);
       this.contactCd = ENEMY_CONTACT_COOLDOWN_SEC;
       const away = Math.atan2(-dy, -dx);
-      this.knockX = Math.cos(away) * 170;
-      this.knockY = Math.sin(away) * 170;
+      this.knockX = Math.cos(away) * (this.state === 'charging' ? 260 : 170);
+      this.knockY = Math.sin(away) * (this.state === 'charging' ? 260 : 170);
+      if (this.state === 'charging') {
+        this.state = 'chase';
+        this.stateTime = 0;
+      }
     }
 
     this.syncSprite();
@@ -264,7 +275,53 @@ export class Enemy {
           this.giveUp(this.def.giveUpCooldownSec ?? 2);
           break;
         }
+        if (
+          this.def.chargeSpeedMult &&
+          this.chargeCd <= 0 &&
+          this.los &&
+          dist >= (this.def.chargeMinRange ?? 90) &&
+          dist <= (this.def.chargeMaxRange ?? 280)
+        ) {
+          this.state = 'telegraph';
+          this.stateTime = 0;
+          this.chargeAngle = Math.atan2(ctx.player.y - this.y, ctx.player.x - this.x);
+          this.marker.setVisible(true).setText('‼');
+          ctx.onChargeStart?.();
+          break;
+        }
         this.chase(ctx);
+        break;
+      }
+      case 'telegraph': {
+        this.stateTime += dt;
+        const total = this.def.chargeTelegraphSec ?? 0.55;
+        if (this.stateTime < total * 0.65) {
+          this.chargeAngle = rotateToward(
+            this.chargeAngle,
+            Math.atan2(ctx.player.y - this.y, ctx.player.x - this.x),
+            5 * dt,
+          );
+        }
+        this.aimAngle = this.chargeAngle;
+        if (this.stateTime >= total) {
+          this.state = 'charging';
+          this.stateTime = 0;
+          this.marker.setVisible(false).setText('!');
+        }
+        break;
+      }
+      case 'charging': {
+        this.stateTime += dt;
+        const dur = this.def.chargeDurationSec ?? 0.35;
+        const speed = this.def.speed * (this.def.chargeSpeedMult ?? 2.6);
+        this.moveBy(ctx, Math.cos(this.chargeAngle) * speed * dt, Math.sin(this.chargeAngle) * speed * dt);
+        this.aimAngle = this.chargeAngle;
+        this.separate(ctx);
+        if (this.stateTime >= dur) {
+          this.state = 'chase';
+          this.stateTime = 0;
+          this.chargeCd = this.def.chargeCooldownSec ?? 2.2;
+        }
         break;
       }
       default:

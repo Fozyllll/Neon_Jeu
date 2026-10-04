@@ -69,6 +69,7 @@ export class UpgradeScene extends Phaser.Scene {
       x: VIEW_W / 2,
       y: VIEW_H - 22,
       size: 14,
+      keyboardNav: false,
     });
 
     this.refresh();
